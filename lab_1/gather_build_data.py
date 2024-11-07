@@ -12,15 +12,19 @@ from pathlib import Path
 
 @dataclass(frozen=True, order=True)
 class Build:
-    """Contains the raw test_data from the log about Gradle builds parsed into string fields,
-    with methods to extract the processed test_data in more convenient formats"""
+    """
+    Contains the raw test_data from the log about Gradle builds parsed into
+    string fields, with methods to extract the processed test_data in more
+    convenient formats
+    """
     when: str
     time_taken: str
     outcome: str
     tasks: str
 
     def to_csv(self):
-        return f"{self.when}, Build, {self.time_taken_in_seconds()}, {self.outcome}, {self.tasks}"
+        return (f"{self.when}, Build, {self.time_taken_in_seconds()}, "
+                f"{self.outcome}, {self.tasks}")
 
     def time_taken_in_seconds(self):
         return parse_to_secs(self.time_taken)
@@ -34,15 +38,19 @@ class Build:
 
 @dataclass(frozen=True, order=True)
 class Sync:
-    """Contains the raw test_data from the log about Project sync events parsed into string fields,
-        with methods to extract the processed test_data in more convenient formats"""
+    """
+    Contains the raw test_data from the log about Project sync events parsed
+    into string fields, with methods to extract the processed test_data in
+    more convenient formats
+    """
     when: str
     time_taken: str
     outcome: str
     project: str
 
     def to_csv(self):
-        return f"{self.when}, Sync, {self.time_taken_in_seconds()}, {self.outcome}, {self.project}"
+        return (f"{self.when}, Sync, {self.time_taken_in_seconds()}, "
+                f"{self.outcome}, {self.project}")
 
     def time_taken_in_seconds(self):
         return parse_to_secs(self.time_taken)
@@ -71,7 +79,8 @@ def parse_to_secs(raw_time):
         fields = fields[:-2]
     if fields and fields[-1] == 'h':
         hours = int(fields[-2])
-    t = datetime.timedelta(hours=hours, minutes=mins, seconds=secs, milliseconds=ms)
+    t = datetime.timedelta(hours=hours, minutes=mins, seconds=secs,
+                           milliseconds=ms)
     return t.total_seconds()
 
 
@@ -81,11 +90,19 @@ class NamedRegex:
     name: str
 
 
-GRADLE_BUILD_START = re.compile(r"^.* About to execute Gradle tasks: \[([\w\s,:-]+)\].*$")
-GRADLE_BUILD_END = re.compile(r"^([\d\-:,\s]+) \[\d+\].* Gradle build (\w+) in ([\d\s\w]+)\n$")
+GRADLE_BUILD_START = re.compile(
+    r"^.* About to execute Gradle tasks: \[([\w\s,:-]+)\].*$"
+)
+GRADLE_BUILD_END = re.compile(
+    r"^([\d\-:,\s]+) \[\d+\].* Gradle build (\w+) in ([\d\s\w]+)\n$"
+)
 
-GRADLE_SYNC_START = re.compile(r"^.* sync with Gradle for project \'([^']+)\'.*$")
-GRADLE_SYNC_END = re.compile(r"^([\d\-:,\s]+) \[\d+\].* Gradle sync (\w+) in ([\d\s\w]+)\n$")
+GRADLE_SYNC_START = re.compile(
+    r"^.* sync with Gradle for project \'([^']+)\'.*$"
+)
+GRADLE_SYNC_END = re.compile(
+    r"^([\d\-:,\s]+) \[\d+\].* Gradle sync (\w+) in ([\d\s\w]+)\n$"
+)
 
 
 def next_match(lines, regexes):
@@ -106,16 +123,18 @@ def next_build(matches):
             when = match.group(1)
             outcome = match.group(2)
             time_taken = match.group(3)
-            yield Build(when=when, outcome=outcome, time_taken=time_taken, tasks=tasks)
-            tasks = ""  # reset tasks in case we get another build before another tasks
+            yield Build(when=when, outcome=outcome, time_taken=time_taken,
+                        tasks=tasks)
+            tasks = ""  # reset tasks for the next build
         if name == "sync_start":
             project = match.group(1)
         if name == "sync_end":
             when = match.group(1)
             outcome = match.group(2)
             time_taken = match.group(3)
-            yield Sync(when=when, outcome=outcome, time_taken=time_taken, project=project)
-            project = ""  # reset project in case we get another sync end before another sync start
+            yield Sync(when=when, outcome=outcome, time_taken=time_taken,
+                       project=project)
+            project = ""  # reset project for the next sync
 
 
 def filter_gradle_builds(lines):
@@ -178,7 +197,10 @@ def main(args):
         path = guess_path_to_idea_log()
     if not path:
         print(
-            "unable to locate 'idea.log'! You can find it in your JetBrains IDE on the 'help' menu - 'Show log in Finder'. You should give the full path to idea.log as an argument to this script.")
+            "unable to locate 'idea.log'! You can find it in your JetBrains IDE"
+            "on the 'help' menu - 'Show log in Finder'. You should give the full"
+            "path to idea.log as an argument to this script."
+        )
         return
 
     data_folder = Path.cwd() / "data"

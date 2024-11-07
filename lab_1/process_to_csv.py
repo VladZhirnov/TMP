@@ -48,10 +48,12 @@ def output_filename(user=None, date=None):
 
 
 def main(args):
-    """Process the log files created by the 'buildstats' script into a csv file,
-    which it will put in the folder 'processed_data'.
-    By default it will look for the log files in the folder 'data'.
-    Pass an argument to look in a different folder instead"""
+    """
+    Process the log files created by the 'buildstats' script into a csv file,
+    which it will put in the folder 'processed_data'. By default it will look
+    for the log files in the folder 'data'. Pass an argument to look in a
+    different folder instead.
+    """
     if args:
         folder = args[0]
     else:
@@ -60,7 +62,8 @@ def main(args):
     if not processed_data_folder.exists():
         os.mkdir(processed_data_folder)
     output_path = processed_data_folder / output_filename()
-    print(f"Will parse log files found under {folder} and write a csv file to {processed_data_folder}")
+    print(f"Will parse log files found under {folder} and write a csv file to "
+          f"{processed_data_folder}")
     with open(output_path, "w") as f:
         builds = gather_builds(folder, f)
         

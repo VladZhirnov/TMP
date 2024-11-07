@@ -7,7 +7,10 @@ from pathlib import Path
 
 
 def main(args):
-    """Remove old log files. Use this after you successfully processed their testdata into a csv file"""
+    """
+    Remove old log files. Use this after you successfully processed their
+    testdata into a csv file
+    """
     if args:
         data_folder = args[0]
     else:
