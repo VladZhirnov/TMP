@@ -149,7 +149,7 @@ def filter_gradle_builds(lines):
 
 
 def get_username():
-    return pwd.getpwuid( os.getuid() )[ 0 ]
+    return pwd.getpwuid(os.getuid())[0]
 
 
 def output_filename(user=None, date=None):
