@@ -5,15 +5,16 @@ import sys
 import datetime
 
 from pathlib import Path
+from typing import List, TextIO, Union
 from gather_build_data import Build, Sync, get_username
 from calculate_statistics import summary_statistics
 
 
-def deduplicate(builds):
+def deduplicate(builds: List[Union[Build, Sync]]) -> List[Union[Build, Sync]]:
     return list(set(builds))
 
 
-def gather_builds_from(f):
+def gather_builds_from(f: TextIO) -> List[Union[Build, Sync]]:
     all_builds = []
     for line in f:
         try:
@@ -25,7 +26,7 @@ def gather_builds_from(f):
     return all_builds
 
 
-def gather_builds(folder, output_csv):
+def gather_builds(folder: Union[str, Path], output_csv: TextIO) -> List[Union[Build, Sync]]:
     all_builds = []
     for root, directories, files in os.walk(folder):
         for file in files:
@@ -41,13 +42,13 @@ def gather_builds(folder, output_csv):
     return sorted_builds
 
 
-def output_filename(user=None, date=None):
+def output_filename(user: Union[str, None] = None, date: Union[datetime.date, None] = None) -> str:
     user = user or get_username()
     date = date or datetime.date.today()
     return f"{date.isoformat()}-{user}.csv"
 
 
-def main(args):
+def main(args: List[str]) -> None:
     """
     Process the log files created by the 'buildstats' script into a csv file,
     which it will put in the folder 'processed_data'. By default it will look

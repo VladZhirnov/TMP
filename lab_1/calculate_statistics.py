@@ -1,18 +1,34 @@
 
 import statistics
 
+from typing import List, Optional, Generator
 
-def total_time(builds):
+
+class Build:
+    def time_taken_in_seconds(self) -> float:
+        pass
+    
+    def is_a_clean(self) -> bool:
+        pass
+
+    def is_a_sync(self) -> bool:
+        pass
+    
+    def is_a_clean_or_sync(self) -> bool:
+        pass
+
+
+def total_time(builds: List[Build]) -> float:
     all_times = (b.time_taken_in_seconds() for b in builds)
     seconds = sum(all_times)
     return seconds
 
 
-def total_build_count(builds):
+def total_build_count(builds: List[Build]) -> int:
     return len(builds)
 
 
-def median_time(builds):
+def median_time(builds: List[Build]) -> Optional[float]:
     all_times = [b.time_taken_in_seconds() for b in builds]
     if not all_times:
         return None
@@ -20,7 +36,7 @@ def median_time(builds):
     return median_time
 
 
-def pretty_print_timedelta(seconds):
+def pretty_print_timedelta(seconds: Optional[float]) -> str:
     if not seconds:
         return ""
     days, seconds = divmod(seconds, 86400)
@@ -40,7 +56,7 @@ def pretty_print_timedelta(seconds):
         return '%d ms' % (milliseconds)
 
 
-def summary_statistics(builds):
+def summary_statistics(builds: List[Build]) -> str:
     builds_excluding_clean = [
         b for b in builds if not b.is_a_clean() and not b.is_a_sync()
     ]
@@ -63,5 +79,5 @@ def summary_statistics(builds):
     return summary
 
 
-def remove_clean_builds(builds):
+def remove_clean_builds(builds: List[Build]) -> Generator[Build, None, None]:
     return (b for b in builds if b.is_a_clean_or_sync())

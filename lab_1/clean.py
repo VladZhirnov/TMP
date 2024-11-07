@@ -4,9 +4,10 @@ import os
 import sys
 
 from pathlib import Path
+from typing import List, Union
 
 
-def main(args):
+def main(args: List[Union[str, Path]]) -> None:
     """
     Remove old log files. Use this after you successfully processed their
     testdata into a csv file

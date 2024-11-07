@@ -8,6 +8,7 @@ import pwd
 
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Optional, Generator, List, Union, Tuple, TextIO, Iterator
 
 
 @dataclass(frozen=True, order=True)
@@ -22,17 +23,17 @@ class Build:
     outcome: str
     tasks: str
 
-    def to_csv(self):
+    def to_csv(self) -> str:
         return (f"{self.when}, Build, {self.time_taken_in_seconds()}, "
                 f"{self.outcome}, {self.tasks}")
 
-    def time_taken_in_seconds(self):
+    def time_taken_in_seconds(self) -> float:
         return parse_to_secs(self.time_taken)
 
-    def is_a_clean(self):
+    def is_a_clean(self) -> bool:
         return self.tasks == 'clean'
 
-    def is_a_sync(self):
+    def is_a_sync(self) -> bool:
         return False
 
 
@@ -48,21 +49,21 @@ class Sync:
     outcome: str
     project: str
 
-    def to_csv(self):
+    def to_csv(self) -> str:
         return (f"{self.when}, Sync, {self.time_taken_in_seconds()}, "
                 f"{self.outcome}, {self.project}")
 
-    def time_taken_in_seconds(self):
+    def time_taken_in_seconds(self) -> float:
         return parse_to_secs(self.time_taken)
 
-    def is_a_clean(self):
+    def is_a_clean(self) -> bool:
         return False
 
-    def is_a_sync(self):
+    def is_a_sync(self) -> bool:
         return True
 
 
-def parse_to_secs(raw_time):
+def parse_to_secs(raw_time: str) -> float:
     ms = 0
     secs = 0
     mins = 0
@@ -105,7 +106,9 @@ GRADLE_SYNC_END = re.compile(
 )
 
 
-def next_match(lines, regexes):
+def next_match(
+    lines: Iterator[str], regexes: List[NamedRegex]
+) -> Generator[Tuple[str, re.Match], None, None]:
     for line in lines:
         for named_regex in regexes:
             match = named_regex.regex.match(line)
@@ -113,7 +116,9 @@ def next_match(lines, regexes):
                 yield named_regex.name, match
 
 
-def next_build(matches):
+def next_build(
+    matches: Generator[Tuple[str, re.Match], None, None]
+) -> Generator[Union[Build, Sync], None, None]:
     tasks = ""
     project = ""
     for name, match in matches:
@@ -137,7 +142,9 @@ def next_build(matches):
             project = ""  # reset project for the next sync
 
 
-def filter_gradle_builds(lines):
+def filter_gradle_builds(
+    lines: Iterator[str]
+) -> Generator[Union[Build, Sync], None, None]:
     matches = next_match(lines, [
         NamedRegex(GRADLE_BUILD_END, "build"),
         NamedRegex(GRADLE_BUILD_START, "tasks"),
@@ -148,28 +155,32 @@ def filter_gradle_builds(lines):
     return builds
 
 
-def get_username():
+def get_username() -> str:
     return pwd.getpwuid(os.getuid())[0]
 
 
-def output_filename(user=None, date=None):
+def output_filename(
+    user: Optional[str] = None, date: Optional[datetime.date] = None
+) -> str:
     user = user or get_username()
     date = date or datetime.date.today()
     return f"{date.isoformat()}-{user}.log"
 
 
-def parse_builds(idea_log, output):
+def parse_builds(idea_log: TextIO, output: TextIO) -> None:
     for build in filter_gradle_builds(idea_log):
         output.write(f"{build}\n")
 
 
-def parse_idea_log(log_file, output_filename):
+def parse_idea_log(
+    log_file: Union[str, Path], output_filename: Union[str, Path]
+) -> None:
     with open(log_file) as f:
         with open(output_filename, "a") as output_file:
             parse_builds(f, output_file)
 
 
-def guess_path_to_idea_log():
+def guess_path_to_idea_log() -> Optional[Path]:
     possible_paths = [
         Path("idea.log"),
         Path.home() / "Library/Logs/Google/AndroidStudio4.2/idea.log",
@@ -181,7 +192,7 @@ def guess_path_to_idea_log():
     return None
 
 
-def main(args):
+def main(args: List[str]) -> None:
     """
     Process the file created by the IDE into a log of builds,
     which it will put in the folder 'data'.
