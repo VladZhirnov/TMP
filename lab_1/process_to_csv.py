@@ -3,9 +3,9 @@
 import os
 import sys
 import datetime
-
 from pathlib import Path
 from typing import List, TextIO, Union
+
 from gather_build_data import Build, Sync, get_username
 from calculate_statistics import summary_statistics
 

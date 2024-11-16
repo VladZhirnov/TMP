@@ -5,10 +5,9 @@ import os
 import re
 import sys
 import pwd
-
-from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional, Generator, List, Union, Tuple, TextIO, Iterator
+from dataclasses import dataclass, field
 
 
 @dataclass(frozen=True, order=True)

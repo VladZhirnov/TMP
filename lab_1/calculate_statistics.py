@@ -1,6 +1,5 @@
 
 import statistics
-
 from typing import List, Optional, Generator
 
 
