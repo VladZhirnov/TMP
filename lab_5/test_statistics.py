@@ -57,3 +57,36 @@ def test_normalize(sample_data):
     stats = Statistics(sample_data)
     result = stats.normalize()
     assert result == [0.0, 0.25, 0.5, 0.75, 1.0]
+
+
+@pytest.mark.parametrize(
+    "data, threshold, expected_count",
+    [
+        ([10, 20, 30], 15, 2),
+        ([5, 5, 5], 5, 0),  
+        ([100, 200, 300], 150, 2),
+        ([1, 2, 3, 4, 5], 0, 5), 
+    ],
+)
+def test_count_above_parametrized(data, threshold, expected_count):
+    stats = Statistics(data)
+    assert stats.count_above(threshold) == expected_count
+
+
+@pytest.mark.parametrize(
+    "data, expected_normalized",
+    [
+        ([10, 20, 30], [0.0, 0.5, 1.0]),         
+        ([1, 1, 1], None),                       
+        ([100, 50, 0], [1.0, 0.5, 0.0]),        
+        ([0, 10, 20], [0.0, 0.5, 1.0]),          
+        ([-10, 0, 10], [0.0, 0.5, 1.0]),         
+    ],
+)
+def test_normalize_parametrized(data, expected_normalized):
+    stats = Statistics(data)
+    if expected_normalized is None:
+        with pytest.raises(ValueError):
+            stats.normalize()
+    else:
+        assert stats.normalize() == expected_normalized
